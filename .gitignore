@@ -1,0 +1,4 @@
+.env
+venv
+mysql_400
+db.sqlite3
