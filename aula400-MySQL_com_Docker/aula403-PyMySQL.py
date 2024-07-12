@@ -1,5 +1,5 @@
 # PyMySQL - um cliente MySQL feito em Python Puro 
-# AULAS: 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413
+# AULAS: 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414
 # lembrando: O MariaDB é um fork do MySQL, ou seja, eles funcionam quase que de maneira similar
 # pip install pymysql
 import pymysql
@@ -124,6 +124,7 @@ with connection:
         
         data5 = cursor.fetchall() # aqui ele esgota o iterator
 
+    # Apagando com DELETE, WHERE e placeholders no PyMySQL
     # CUIDADO COMO 'DELETE' SEM 'WHERE' 
     with connection.cursor() as cursor:
         sql = (
@@ -134,5 +135,20 @@ with connection:
         connection.commit()
 
         cursor.execute(f'SELECT * FROM {TABLE_NAME} ')
+        # for row in cursor.fetchall():
+        #     print(row)
+
+    # Editando com UPDATE, WHERE  e placeholders no PyMySQL
+    with connection.cursor() as cursor:
+        sql = (
+            f'UPDATE {TABLE_NAME} '
+            'SET nome = %s, idade = %s '
+            'WHERE id = %s '
+            )
+        cursor.execute(sql, ('Eleonor', 102, 4))
+
+        cursor.execute(f'SELECT * FROM {TABLE_NAME} ')
+
         for row in cursor.fetchall():
             print(row)
+        connection.commit()
