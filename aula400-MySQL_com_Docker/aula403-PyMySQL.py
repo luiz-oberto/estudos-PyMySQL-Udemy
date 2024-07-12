@@ -1,12 +1,16 @@
 # PyMySQL - um cliente MySQL feito em Python Puro 
-# AULAS: 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414
+# AULAS: 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417
 # lembrando: O MariaDB é um fork do MySQL, ou seja, eles funcionam quase que de maneira similar
 # pip install pymysql
+import os
+from typing import cast
+
 import pymysql
 import dotenv
-import os
+import pymysql.cursors
 
 TABLE_NAME = 'customers'
+CURRENT_CURSOR = pymysql.cursors.SSDictCursor
 
 dotenv.load_dotenv()
 
@@ -15,6 +19,9 @@ connection = pymysql.connect(
     user=os.environ['MYSQL_USER'],
     password=os.environ['MYSQL_PASSWORD'],
     database=os.environ['MYSQL_DATABASE'],
+    charset='utf8mb4',
+    cursorclass=CURRENT_CURSOR,
+
 )
 
 print(os.environ['MYSQL_DATABASE'])
@@ -149,6 +156,44 @@ with connection:
 
         cursor.execute(f'SELECT * FROM {TABLE_NAME} ')
 
-        for row in cursor.fetchall():
+        # for row in cursor.fetchall():
+        #     _id, nome, idade = row.values()
+        #     print(_id, nome, idade)
+
+        # depois que é adcionanda na poarte de conexão o parâmetro cursorclass=pymysql.cursors.DictCursor
+        # as linhas(row) podem ser desempacotadas com os seguintes métodos
+        # row.values() -> retorna uma tupla com os valores
+        # row.keys() -> retorna uma tupla com as chaves
+        # row.items() -> retorna uma tupla com os valores e as chaves
+        
+        # for row in cursor.fetchall():
+        #     print(row)
+
+        # connection.commit()
+
+
+    with connection.cursor() as cursor:
+        cursor = cast(CURRENT_CURSOR, cursor)
+
+        sql = (
+            f'UPDATE {TABLE_NAME} '
+            'SET nome = %s, idade = %s '
+            'WHERE id = %s '
+            )
+        cursor.execute(sql, ('Eleonor', 102, 4))
+        cursor.execute(f'SELECT * FROM {TABLE_NAME} ')
+
+        print()
+        print('For 1: ')
+        for row in cursor.fetchall_unbuffered():
             print(row)
-        connection.commit()
+
+            if row['id'] >= 5:
+                break
+
+        print()
+        print('For 2: ')
+        # cursor.scroll(-1)
+        for row in cursor.fetchall_unbuffered():
+            print(row)
+    connection.commit()
